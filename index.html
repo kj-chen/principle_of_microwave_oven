@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔥 微波爐加熱原理：狂甩水分子電音派對 | 趣味物理動畫互動實驗室</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(22, 30, 49, 0.82);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --cyan: #38bdf8;
+      --yellow: #facc15;
+      --red: #f87171;
+      --green: #4ade80;
+      --purple: #c084fc;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #090d16 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* 頂部標題 */
+    header {
+      padding: 14px 24px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .title-group h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #38bdf8, #facc15, #f87171);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-group p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: var(--cyan);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-myth {
+      background: rgba(248, 113, 113, 0.15);
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      color: var(--red);
+    }
+
+    /* 主版面配置 (Canvas 畫面 + 控制面板) */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1540px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 左側主畫布容器 */
+    .canvas-card {
+      position: relative;
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+      min-height: 580px;
+    }
+
+    /* 頂部視角切換器 */
+    .view-tabs {
+      display: flex;
+      background: rgba(30, 41, 59, 0.85);
+      border-bottom: 1px solid var(--card-border);
+      padding: 6px 12px;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      color: #0f172a;
+      background: var(--cyan);
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.4);
+    }
+
+    .canvas-viewport {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 500px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 浮動 HUD 儀表板 */
+    .hud-box {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.82rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+      min-width: 220px;
+    }
+
+    .hud-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .hud-label { color: var(--text-muted); }
+    .hud-val { font-weight: 700; font-family: monospace; color: var(--cyan); }
+
+    /* 溫度計柱狀顯示 */
+    .temp-bar-box {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .temp-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .temp-fill {
+      height: 100%;
+      width: 20%;
+      background: linear-gradient(90deg, #38bdf8 0%, #facc15 50%, #ef4444 100%);
+      transition: width 0.1s linear;
+    }
+
+    /* 角色詼諧對話氣泡 */
+    .comic-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.96);
+      color: #0f172a;
+      padding: 8px 14px;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform: translate(-50%, -100%);
+      opacity: 0;
+      z-index: 5;
+      white-space: nowrap;
+    }
+    .comic-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0;
+      border-style: solid;
+      border-color: rgba(255, 255, 255, 0.96) transparent;
+    }
+
+    /* 右側控制面板 */
+    .panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .panel-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .ctrl-val {
+      color: var(--cyan);
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--cyan);
+      transition: transform 0.1s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* 開關切換按鈕組 */
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .switch-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .switch-btn.active {
+      background: #10b981;
+      border-color: #10b981;
+      color: #fff;
+    }
+    .switch-btn.danger.active {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: #fff;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { box-shadow: 0 0 5px #ef4444; }
+      to { box-shadow: 0 0 16px #ef4444; }
+    }
+
+    /* 核心操作主按鈕 */
+    .btn-main {
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: #0f172a;
+      border: none;
+      padding: 13px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 10px 20px -6px rgba(56, 189, 248, 0.5);
+    }
+    .btn-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px -6px rgba(56, 189, 248, 0.8);
+    }
+    .btn-main.heating {
+      background: linear-gradient(135deg, #b91c1c, #ef4444);
+      color: #fff;
+      box-shadow: 0 10px 20px -6px rgba(239, 68, 68, 0.6);
+    }
+
+    .btn-sub-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-sub {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      padding: 9px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-sub:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* 底部物理素養思辨卡 (笑完想一想) */
+    .insight-box {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      line-height: 1.55;
+      margin-top: auto;
+    }
+    .insight-box strong {
+      color: var(--yellow);
+      display: block;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-group">
+      <h1>⚡ 微波爐加熱原理：狂甩水分子電音派對</h1>
+      <p>💡 介電加熱 (Dielectric Heating) ╳ 電偶極旋轉 ╳ 腔體駐波與旋轉盤謎題</p>
+    </div>
+    <div class="header-badges">
+      <span class="badge">📡 2.45 GHz 偶極翻轉</span>
+      <span class="badge badge-myth">❌ 破除「分子共振」迷思</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- 左側動態畫布 -->
+    <div class="canvas-card">
+      <!-- 視角切換器 -->
+      <div class="view-tabs">
+        <button class="tab-btn active" id="tabMicro" onclick="setViewMode('micro')">🔬 微觀視角：水分子電偶極狂甩派對</button>
+        <button class="tab-btn" id="tabMacro" onclick="setViewMode('macro')">📦 宏觀視角：微波爐腔體駐波與轉盤</button>
+        <button class="tab-btn" id="tabSplit" onclick="setViewMode('split')">🔀 雙視角同步連動</button>
+      </div>
+
+      <div class="canvas-viewport" id="viewport">
+        <canvas id="simCanvas"></canvas>
+
+        <!-- 即時數據 HUD -->
+        <div class="hud-box" id="hud">
+          <div class="hud-row"><span class="hud-label">加熱時間:</span><span class="hud-val" id="hudTime">0.0 秒</span></div>
+          <div class="hud-row"><span class="hud-label">交變電場 E:</span><span class="hud-val" id="hudE">+100% ➔</span></div>
+          <div class="hud-row"><span class="hud-label">水分子平均轉速:</span><span class="hud-val" id="hudRpm">0 RPM</span></div>
+          <div class="hud-row"><span class="hud-label">微波消耗功率:</span><span class="hud-val" id="hudPower">800 W</span></div>
+          <div class="temp-bar-box">
+            <div class="hud-row"><span class="hud-label">平均溫度:</span><span class="hud-val" id="hudTemp" style="color:var(--yellow);">25.0 °C</span></div>
+            <div class="temp-track"><div class="temp-fill" id="tempBar"></div></div>
+          </div>
+        </div>
+
+        <!-- 角色詼諧對話氣泡 -->
+        <div class="comic-bubble" id="bubble">阿傑：啟動微波！準備享用香噴噴雞排！</div>
+      </div>
+    </div>
+
+    <!-- 右側控制面板 -->
+    <div class="panel">
+      <div class="panel-title">🎛️ 微波加熱參數調整</div>
+
+      <!-- 參數 1: 微波頻率 -->
+      <div class="ctrl-group">
+        <div class="ctrl-header">
+          <span>微波頻率 (f)</span>
+          <span class="ctrl-val" id="valFreq">2.45 GHz (標準)</span>
+        </div>
+        <input type="range" id="sliderFreq" min="0.5" max="5.0" value="2.45" step="0.05">
+        <span style="font-size:0.7rem; color:var(--text-muted);">每秒變換極性 24.5 億次，迫使水分子扭頭！</span>
+      </div>
+
+      <!-- 參數 2: 微波功率 -->
+      <div class="ctrl-group">
+        <div class="ctrl-header">
+          <span>微波輸出功率 (P)</span>
+          <span class="ctrl-val" id="valPower">800 W</span>
+        </div>
+        <input type="range" id="sliderPower" min="100" max="1200" value="800" step="50">
+      </div>
+
+      <!-- 參數 3: 食物含水量 -->
+      <div class="ctrl-group">
+        <div class="ctrl-header">
+          <span>食物含水比例 (%)</span>
+          <span class="ctrl-val" id="valWater">80% (多汁雞排)</span>
+        </div>
+        <input type="range" id="sliderWater" min="0" max="100" value="80" step="5">
+      </div>
+
+      <!-- 開關: 旋轉盤 -->
+      <div class="toggle-row">
+        <span>🔄 底部旋轉盤功能</span>
+        <button class="switch-btn active" id="btnTurntable" onclick="toggleTurntable()">運轉中 (勻熱)</button>
+      </div>
+
+      <!-- 開關: 慢動作 -->
+      <div class="toggle-row">
+        <span>🐢 電場慢動作觀察 (0.1x)</span>
+        <button class="switch-btn" id="btnSlow" onclick="toggleSlowMo()">關閉</button>
+      </div>
+
+      <!-- 💥 搞笑彩蛋: 放入金屬鐵叉 -->
+      <div class="toggle-row" style="background:rgba(239, 68, 68, 0.08); border-color:rgba(239, 68, 68, 0.25);">
+        <span style="color:#fca5a5;">⚡ 放入金屬鐵叉 (危險彩蛋)</span>
+        <button class="switch-btn danger" id="btnFork" onclick="toggleFork()">無金屬</button>
+      </div>
+
+      <!-- 主控制開關 -->
+      <button class="btn-main" id="btnStart" onclick="toggleMicrowave()">🔥 啟動微波加熱！</button>
+
+      <div class="btn-sub-grid">
+        <button class="btn-sub" onclick="resetExperiment()">🔄 重新放一塊冷便當</button>
+        <button class="btn-sub" onclick="triggerGag()">💬 呼叫學霸貓吐槽</button>
+      </div>
+
+      <!-- 物理素養思辨卡 -->
+      <div class="insight-box">
+        <strong>💡 笑完想一想 (108 課綱物理素養)：</strong>
+        1. <strong>為什麼生米微波不會熟，加水卻會沸騰？</strong>（微波只對電偶極水分子施加力矩，乾燥固體幾乎無法吸收介電能量）<br>
+        2. <strong>如果不開旋轉盤，為什麼便當會「一邊燙焦、一邊還是冰塊」？</strong>（請切換至宏觀視角觀察金屬腔體內的反射駐波節點！）
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // --- 核心變數與畫布設置 ---
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const viewport = document.getElementById('viewport');
+
+    let width, height;
+    let dpr = window.devicePixelRatio || 1;
+
+    let viewMode = 'micro'; // 'micro', 'macro', 'split'
+    let isHeating = false;
+    let isSlowMo = false;
+    let turntableOn = true;
+    let hasMetalFork = false;
+
+    let simTime = 0;
+    let temperature = 25.0; // 起始室溫 25°C
+    let electricField = 0; // 當前電場方向與強度 (-1 ~ +1)
+    let wavePhase = 0;
+
+    // 參數拉桿數值
+    let paramFreq = 2.45;
+    let paramPower = 800;
+    let paramWater = 80;
+
+    // 水分子群組 (微觀模擬)
+    const molecules = [];
+    const NUM_MOLECULES = 42;
+
+    for (let i = 0; i < NUM_MOLECULES; i++) {
+      molecules.push({
+        x: 0,
+        y: 0,
+        angle: Math.random() * Math.PI * 2,
+        angularVelocity: 0,
+        baseAngle: Math.random() * Math.PI * 2,
+        dizzy: 0, // 暈眩蚊香眼計時
+        jitterX: 0,
+        jitterY: 0
+      });
+    }
+
+    // 蒸氣泡泡粒子
+    const steamParticles = [];
+
+    // 幽默台詞庫
+    const catRoasts = [
+      "貓咪：愚蠢的碳基生物，再說微波爐是『分子共振』你就給我去補習！",
+      "水分子：救命啊！一秒鐘要我扭頭二十四億次，落枕啦！",
+      "阿傑：哇！金屬叉子放進去直接變雷神索爾降臨！快拔插頭！",
+      "貓咪：轉盤關掉了吧？等一下咬下去保證中心夾冰塊，外面燙出水泡！",
+      "水分子：乾洋芋片裡根本沒有我們水分子，微波它只會浪費電！"
+    ];
+
+    // 初始化畫布尺寸
+    function resize() {
+      dpr = window.devicePixelRatio || 1;
+      width = viewport.clientWidth;
+      height = viewport.clientHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+
+      // 分佈水分子初始網格
+      layoutMolecules();
+    }
+    window.addEventListener('resize', resize);
+
+    function layoutMolecules() {
+      const cols = 7;
+      const rows = 6;
+      const startX = width * 0.18;
+      const startY = height * 0.22;
+      const stepX = (width * 0.64) / cols;
+      const stepY = (height * 0.6) / rows;
+
+      molecules.forEach((m, idx) => {
+        const c = idx % cols;
+        const r = Math.floor(idx / cols);
+        m.x = startX + c * stepX + (Math.random() - 0.5) * 15;
+        m.y = startY + r * stepY + (Math.random() - 0.5) * 15;
+      });
+    }
+
+    // 切換視角模式
+    function setViewMode(mode) {
+      viewMode = mode;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (mode === 'micro') document.getElementById('tabMicro').classList.add('active');
+      if (mode === 'macro') document.getElementById('tabMacro').classList.add('active');
+      if (mode === 'split') document.getElementById('tabSplit').classList.add('active');
+      triggerBubble(`視角已切換至：${mode === 'micro' ? '🔬 微觀水分子' : mode === 'macro' ? '📦 宏觀腔體駐波' : '🔀 雙視角同步'}`);
+    }
+
+    // 氣泡顯示
+    function triggerBubble(text) {
+      const b = document.getElementById('bubble');
+      b.innerText = text;
+      b.style.left = `${width * 0.5}px`;
+      b.style.top = `${height * 0.15}px`;
+      b.style.opacity = '1';
+      setTimeout(() => b.style.opacity = '0', 3500);
+    }
+
+    function triggerGag() {
+      const msg = catRoasts[Math.floor(Math.random() * catRoasts.length)];
+      triggerBubble(msg);
+    }
+
+    // 啟動 / 暫停微波
+    function toggleMicrowave() {
+      isHeating = !isHeating;
+      const btn = document.getElementById('btnStart');
+      if (isHeating) {
+        btn.innerText = '⏹️ 停止微波爐！';
+        btn.classList.add('heating');
+        triggerBubble(hasMetalFork ? "⚡ 警告！金屬放進去產生超高壓電弧！" : "🔥 微波射出！電場開始每秒億萬次極性翻轉！");
+      } else {
+        btn.innerText = '🔥 啟動微波加熱！';
+        btn.classList.remove('heating');
+        triggerBubble("叮！加熱完畢！來看看溫度與熟度！");
+      }
+    }
+
+    function toggleTurntable() {
+      turntableOn = !turntableOn;
+      const btn = document.getElementById('btnTurntable');
+      btn.innerText = turntableOn ? "運轉中 (勻熱)" : "已停用 (產生冷熱死區)";
+      btn.className = `switch-btn ${turntableOn ? 'active' : ''}`;
+      if (!turntableOn) {
+        triggerBubble("⚠️ 轉盤已停止！微波駐波將在食物上產生冰凍波節與滾燙波腹！");
+      }
+    }
+
+    function toggleSlowMo() {
+      isSlowMo = !isSlowMo;
+      const btn = document.getElementById('btnSlow');
+      btn.innerText = isSlowMo ? "慢動作運作中" : "關閉";
+      btn.className = `switch-btn ${isSlowMo ? 'active' : ''}`;
+    }
+
+    function toggleFork() {
+      hasMetalFork = !hasMetalFork;
+      const btn = document.getElementById('btnFork');
+      btn.innerText = hasMetalFork ? "⚠️ 放入鐵叉！" : "無金屬";
+      btn.className = `switch-btn danger ${hasMetalFork ? 'active' : ''}`;
+      if (hasMetalFork) {
+        triggerBubble("💥 誰把鐵叉丟進去的？！尖端電荷聚集即將引發電弧放電！");
+      }
+    }
+
+    function resetExperiment() {
+      isHeating = false;
+      simTime = 0;
+      temperature = 25.0;
+      document.getElementById('btnStart').innerText = '🔥 啟動微波加熱！';
+      document.getElementById('btnStart').classList.remove('heating');
+      molecules.forEach(m => {
+        m.angularVelocity = 0;
+        m.dizzy = 0;
+      });
+      triggerBubble("🔄 冷便當已重新放入！請嘗試不同參數！");
+      updateHUD();
+    }
+
+    // --- 物理更新主迴圈 ---
+    let lastTime = performance.now();
+    function mainLoop(now) {
+      const dtReal = (now - lastTime) / 1000;
+      lastTime = now;
+      const dt = Math.min(dtReal, 0.033) * (isSlowMo ? 0.1 : 1.0);
+
+      // 讀取拉桿
+      paramFreq = parseFloat(document.getElementById('sliderFreq').value);
+      paramPower = parseFloat(document.getElementById('sliderPower').value);
+      paramWater = parseFloat(document.getElementById('sliderWater').value);
+
+      document.getElementById('valFreq').innerText = `${paramFreq.toFixed(2)} GHz`;
+      document.getElementById('valPower').innerText = `${paramPower} W`;
+      document.getElementById('valWater').innerText = `${paramWater}% (${paramWater > 60 ? '多汁' : paramWater > 20 ? '適中' : '乾燥'})`;
+
+      if (isHeating) {
+        simTime += dt;
+        wavePhase += paramFreq * 12 * dt;
+        electricField = Math.sin(wavePhase);
+
+        // 加熱升溫邏輯 (取決於含水量、微波功率、頻率耦合度)
+        const waterFactor = paramWater / 100;
+        // 最佳耦合頻率為 2.45 GHz
+        const couplingFactor = Math.exp(-Math.pow(paramFreq - 2.45, 2) / 2.0);
+        const heatRate = (paramPower / 800) * waterFactor * couplingFactor * 14.0;
+        temperature = Math.min(108, temperature + heatRate * dt);
+
+        // 水分子受交變電場力矩旋轉: tau = p x E
+        // 目標朝向: 電場 > 0 時朝右 (0度), 電場 < 0 時朝左 (PI)
+        const targetAngle = electricField >= 0 ? 0 : Math.PI;
+        const torqueStrength = Math.abs(electricField) * (paramPower / 400) * 80;
+
+        molecules.forEach(m => {
+          let diff = targetAngle - m.angle;
+          // 正規化角度差至 -PI ~ PI
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+
+          // 角加速度 a = tau - 阻尼*w + 熱擾動
+          const torque = diff * torqueStrength;
+          const damping = 14.0;
+          const thermalNoise = (Math.random() - 0.5) * (temperature / 10);
+
+          m.angularVelocity += (torque - m.angularVelocity * damping + thermalNoise) * dt;
+          m.angle += m.angularVelocity * dt;
+
+          // 劇烈扭動時累積暈眩值
+          if (Math.abs(m.angularVelocity) > 15) m.dizzy = 1.0;
+          else m.dizzy = Math.max(0, m.dizzy - dt);
+
+          // 熱震動抖動
+          m.jitterX = (Math.random() - 0.5) * (temperature / 35);
+          m.jitterY = (Math.random() - 0.5) * (temperature / 35);
+        });
+
+        // 沸騰產生蒸氣粒子
+        if (temperature > 85 && Math.random() < (temperature - 80) * 0.05) {
+          steamParticles.push({
+            x: width * 0.3 + Math.random() * (width * 0.4),
+            y: height * 0.7,
+            vx: (Math.random() - 0.5) * 20,
+            vy: -40 - Math.random() * 50,
+            alpha: 0.8,
+            radius: 8 + Math.random() * 12
+          });
+        }
+      } else {
+        electricField *= 0.9;
+        // 自然緩慢冷卻
+        temperature = Math.max(25, temperature - 0.6 * dt);
+        molecules.forEach(m => {
+          m.angularVelocity *= 0.95;
+          m.dizzy = Math.max(0, m.dizzy - dt);
+        });
+      }
+
+      // 更新蒸氣粒子
+      for (let i = steamParticles.length - 1; i >= 0; i--) {
+        const p = steamParticles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.alpha -= dt * 0.6;
+        p.radius += dt * 8;
+        if (p.alpha <= 0) steamParticles.splice(i, 1);
+      }
+
+      updateHUD();
+      draw();
+      requestAnimationFrame(mainLoop);
+    }
+
+    // 更新儀表板
+    function updateHUD() {
+      document.getElementById('hudTime').innerText = `${simTime.toFixed(1)} 秒`;
+      const eDir = electricField > 0 ? "➔ 正向極性" : "⬅ 反向極性";
+      document.getElementById('hudE').innerText = `${(electricField * 100).toFixed(0)}% ${eDir}`;
+      const avgOmega = molecules.reduce((acc, m) => acc + Math.abs(m.angularVelocity), 0) / molecules.length;
+      document.getElementById('hudRpm').innerText = `${(avgOmega * 60 / (2 * Math.PI) * 100).toFixed(0)} RPM`;
+      document.getElementById('hudPower').innerText = `${paramPower} W`;
+      document.getElementById('hudTemp').innerText = `${temperature.toFixed(1)} °C`;
+
+      const tempPercent = Math.min(100, Math.max(0, (temperature - 20) / 80 * 100));
+      document.getElementById('tempBar').style.width = `${tempPercent}%`;
+    }
+
+    // --- 繪製主流程 ---
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      if (viewMode === 'micro') {
+        drawMicroView(0, 0, width, height);
+      } else if (viewMode === 'macro') {
+        drawMacroView(0, 0, width, height);
+      } else if (viewMode === 'split') {
+        drawMicroView(0, 0, width * 0.5, height);
+        // 分割線
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(width * 0.5, 0);
+        ctx.lineTo(width * 0.5, height);
+        ctx.stroke();
+        drawMacroView(width * 0.5, 0, width * 0.5, height);
+      }
+
+      // 繪製蒸氣粒子
+      drawSteam();
+
+      // 繪製金屬鐵叉電弧彩蛋
+      if (isHeating && hasMetalFork) {
+        drawSparks();
+      }
+    }
+
+    // --- 1. 繪製微觀視角 (水分子電偶極狂甩) ---
+    function drawMicroView(ox, oy, w, h) {
+      // 標題浮水印
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText("🔬 水分子微觀介電翻轉 (米老鼠電偶極)", ox + 24, oy + 40);
+
+      // 繪製大背景交變電場箭頭陣列
+      ctx.save();
+      const numArrows = 6;
+      for (let i = 1; i <= numArrows; i++) {
+        const yPos = oy + (h / (numArrows + 1)) * i;
+        const arrowLen = electricField * (w * 0.28);
+        drawElectricFieldArrow(ox + w * 0.5, yPos, arrowLen);
+      }
+      ctx.restore();
+
+      // 繪製水分子 (主動分子數量根據含水量)
+      const activeCount = Math.floor(molecules.length * (paramWater / 100));
+
+      molecules.forEach((m, idx) => {
+        if (idx >= activeCount) return; // 乾燥無水
+
+        // 映射座標至當前視口
+        const posX = ox + (m.x / width) * w + m.jitterX;
+        const posY = oy + (m.y / height) * h + m.jitterY;
+
+        drawWaterMolecule(posX, posY, m.angle, m.dizzy > 0);
+      });
+
+      // 若乾燥無水提示
+      if (activeCount === 0) {
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText("⚠️ 含水量為 0% (乾燥生米/乾餅乾)！無電偶極可受力，無法吸收微波！", ox + w * 0.5, oy + h * 0.5);
+      }
+    }
+
+    // 繪製單顆水分子 (紅色氧原子 + 兩個白色氫原子 + 搞笑臉)
+    function drawWaterMolecule(x, y, angle, isDizzy) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      // 電偶極矩向量虛線箭頭 (由負極氧指向正極氫中點)
+      if (isHeating) {
+        ctx.strokeStyle = 'rgba(250, 204, 21, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(-16, 0);
+        ctx.lineTo(24, 0);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // 氧原子 (O: 帶微負電，半徑 15px 紅色)
+      ctx.fillStyle = '#ef4444';
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = isHeating ? 10 : 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 負電標記 δ⁻
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText("δ⁻", -4, 0);
+
+      // 兩個氫原子 (H: 帶微正電，夾角 104.5 度)
+      const hDist = 18;
+      const hAngle = (104.5 * Math.PI) / 180 / 2; // 52.25度
+      const hRadius = 8;
+
+      // 氫原子 1 (上方)
+      const h1x = Math.cos(hAngle) * hDist;
+      const h1y = -Math.sin(hAngle) * hDist;
+      ctx.fillStyle = '#f8fafc';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(h1x, h1y, hRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.fillText("δ⁺", h1x, h1y);
+
+      // 氫原子 2 (下方)
+      const h2x = Math.cos(-hAngle) * hDist;
+      const h2y = -Math.sin(-hAngle) * hDist;
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(h2x, h2y, hRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillText("δ⁺", h2x, h2y);
+
+      // 搞笑眼睛表情 (暈眩蚊香眼 vs 驚慌瞪大眼)
+      ctx.fillStyle = '#0f172a';
+      if (isDizzy && isHeating) {
+        // 蚊香旋轉眼 @ @
+        ctx.font = '11px monospace';
+        ctx.fillText("@", 4, -4);
+        ctx.fillText("@", 4, 4);
+      } else if (isHeating) {
+        // 驚嚇張大眼 > <
+        ctx.font = 'bold 10px sans-serif';
+        ctx.fillText(">", 4, -4);
+        ctx.fillText("<", 4, 4);
+      } else {
+        // 舒服微笑眼 ^ ^
+        ctx.font = '9px sans-serif';
+        ctx.fillText("^", 4, -4);
+        ctx.fillText("^", 4, 4);
+      }
+
+      ctx.restore();
+    }
+
+    // 繪製背景電場箭頭
+    function drawElectricFieldArrow(cx, cy, len) {
+      if (Math.abs(len) < 4) return;
+      ctx.save();
+      const color = len > 0 ? 'rgba(56, 189, 248, 0.45)' : 'rgba(248, 113, 113, 0.45)';
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(cx - len, cy);
+      ctx.lineTo(cx + len, cy);
+      ctx.stroke();
+
+      // 箭頭
+      const dir = len > 0 ? 1 : -1;
+      ctx.beginPath();
+      ctx.moveTo(cx + len, cy);
+      ctx.lineTo(cx + len - dir * 10, cy - 6);
+      ctx.lineTo(cx + len - dir * 10, cy + 6);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // --- 2. 繪製宏觀視角 (腔體駐波與旋轉盤) ---
+    function drawMacroView(ox, oy, w, h) {
+      // 標題
+      ctx.fillStyle = 'rgba(250, 204, 21, 0.2)';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText("📦 微波爐內部：金屬反射駐波與冷熱斑點", ox + 24, oy + 40);
+
+      // 繪製金屬微波爐金屬腔體外框
+      const boxMargin = 36;
+      const boxX = ox + boxMargin;
+      const boxY = oy + boxMargin + 20;
+      const boxW = w - boxMargin * 2;
+      const boxH = h - boxMargin * 2 - 20;
+
+      // 金屬反光壁面
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+
+      // 上方磁控管 (Magnetron) 與微波發射天線
+      const magX = boxX + 60;
+      const magY = boxY;
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(magX - 25, magY - 14, 50, 14);
+      ctx.fillStyle = '#facc15';
+      ctx.fillText("磁控管 2.45GHz", magX - 45, magY - 18);
+
+      // 繪製金屬腔體內部駐波圖形 (Standing Wave)
+      // E(x) = E0 * |sin(kx)| * sin(wt)
+      const waveY = boxY + boxH * 0.35;
+      const numNodes = 4; // 駐波腹點與節點數
+      const k = (numNodes * Math.PI) / boxW;
+
+      ctx.save();
+      ctx.lineWidth = 2.5;
+
+      // 繪製駐波包絡線 (透明藍色波形)
+      ctx.strokeStyle = isHeating ? 'rgba(56, 189, 248, 0.8)' : 'rgba(255, 255, 255, 0.15)';
+      ctx.beginPath();
+      for (let x = 0; x <= boxW; x += 4) {
+        const amp = isHeating ? Math.sin(k * x) * Math.sin(wavePhase * 0.3) * (boxH * 0.22) : 0;
+        if (x === 0) ctx.moveTo(boxX + x, waveY + amp);
+        else ctx.lineTo(boxX + x, waveY + amp);
+      }
+      ctx.stroke();
+
+      // 標註「波腹 (高熱點)」與「波節 (結冰零點)」
+      if (isHeating) {
+        ctx.font = 'bold 11px sans-serif';
+        for (let i = 0; i < numNodes; i++) {
+          const antinodeX = boxX + (i + 0.5) * (boxW / numNodes);
+          const nodeX = boxX + i * (boxW / numNodes);
+
+          // 波腹標註 (紅火)
+          ctx.fillStyle = '#ef4444';
+          ctx.fillText("🔥波腹 (熱點)", antinodeX - 30, waveY - boxH * 0.22 - 6);
+
+          // 波節標註 (冰霜)
+          if (i > 0) {
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText("❄️波節 (冷點)", nodeX - 30, waveY + boxH * 0.22 + 18);
+          }
+        }
+      }
+      ctx.restore();
+
+      // 下方旋轉盤與食物便當
+      const tableCenterX = boxX + boxW * 0.5;
+      const tableCenterY = boxY + boxH * 0.78;
+      const tableRadius = boxW * 0.32;
+
+      // 旋轉盤底座
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(tableCenterX, tableCenterY, tableRadius, tableRadius * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // 食物便當位置 (若轉盤開啟則旋轉)
+      const plateAngle = turntableOn ? (simTime * 0.8) : 0;
+      const foodOffsetX = Math.cos(plateAngle) * (tableRadius * 0.45);
+      const foodOffsetY = Math.sin(plateAngle) * (tableRadius * 0.14);
+
+      const foodX = tableCenterX + foodOffsetX;
+      const foodY = tableCenterY + foodOffsetY - 12;
+
+      // 繪製便當肉排
+      ctx.fillStyle = temperature > 80 ? '#78350f' : '#d97706'; // 熟成變深色
+      ctx.shadowColor = isHeating ? '#f59e0b' : 'transparent';
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.ellipse(foodX, foodY, 44, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 冷熱不均提示 (若轉盤關閉)
+      if (isHeating && !turntableOn) {
+        // 左側在波節結冰、右側在波腹焦黑
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText("❄️ 凍冰冰", foodX - 35, foodY + 4);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillText("🔥 燒焦了", foodX + 8, foodY + 4);
+      } else {
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText(temperature > 75 ? "🍗 均勻熟透香噴噴！" : "🍱 解凍加熱中...", foodX - 44, foodY + 4);
+      }
+      ctx.restore();
+    }
+
+    // 繪製蒸氣粒子
+    function drawSteam() {
+      ctx.save();
+      steamParticles.forEach(p => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    // 繪製電弧閃電彩蛋
+    function drawSparks() {
+      ctx.save();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 14;
+
+      const sx = width * 0.5 + (Math.random() - 0.5) * 80;
+      const sy = height * 0.55 + (Math.random() - 0.5) * 40;
+
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      for (let i = 0; i < 4; i++) {
+        ctx.lineTo(sx + (Math.random() - 0.5) * 50, sy + (Math.random() - 0.5) * 50);
+      }
+      ctx.stroke();
+
+      // 爆炸提示
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText("⚡ BZZZ! 尖端高壓電弧！", sx - 80, sy - 20);
+      ctx.restore();
+    }
+
+    // 啟動
+    resize();
+    requestAnimationFrame(mainLoop);
+  </script>
+</body>
+</html>
